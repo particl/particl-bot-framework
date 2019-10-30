@@ -1,0 +1,36 @@
+{
+  "name": "particl-bot-core",
+  "version": "0.0.1",
+  "description": "SMSG Bot Core",
+  "author": "Robert Edwards <rob@particl.io>",
+  "license": "GPL-2.0",
+  "main": "lib/particl-bot-core.js",
+  "typings": "lib/particl-bot-core.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1",
+    "prebuild": "rimraf lib",
+    "build": "tsc",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "lint": "tslint -p tsconfig.json",
+    "prepublish": "yarn build"
+  },
+  "devDependencies": {
+    "@types/node": "^12.7.12",
+    "prettier": "^1.18.2",
+    "tslint": "^5.20.0",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.6.4",
+    "rimraf": "^3.0.0"
+  },
+  "dependencies": {
+    "particl-bitcore-lib": "git://github.com/particl/particl-bitcore-lib.git",
+    "particl-client": "^0.0.1"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "particl-bot",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "postinstall": "npm run bootstrap",
+    "bootstrap": "./node_modules/.bin/lerna bootstrap",
+    "build": "./node_modules/.bin/lerna run build --parallel",
+    "lerna": "./node_modules/.bin/lerna"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "lerna": "^3.17.0"
+  }
+}
