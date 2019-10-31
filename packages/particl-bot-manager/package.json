@@ -1,6 +1,6 @@
 {
   "name": "particl-bot-manager",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "",
   "author": "",
   "license": "MIT",
@@ -41,13 +41,13 @@
     "class-transformer": "^0.2.3",
     "class-validator": "^0.10.1",
     "dotenv": "^8.2.0",
+    "particl-bot-core": "^0.0.1",
+    "particl-client": "^0.0.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.0",
     "rxjs": "^6.5.3",
     "sqlite3": "https://github.com/particl/sqlite3-offline.git",
-    "typeorm": "^0.2.19",
-    "particl-bot-core": "^0.0.1",
-    "particl-client": "^0.0.1"
+    "typeorm": "^0.2.19"
   },
   "devDependencies": {
     "@nestjs/cli": "^6.9.0",
