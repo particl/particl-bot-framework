@@ -1,6 +1,6 @@
 {
   "name": "particl-client",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "> TODO: description",
   "author": "Robert Edwards <robertedwardsmail@gmail.com>",
   "homepage": "",
@@ -25,10 +25,10 @@
   "devDependencies": {
     "@types/node": "^12.7.12",
     "prettier": "^1.18.2",
+    "rimraf": "^3.0.0",
     "tslint": "^5.20.0",
     "tslint-config-prettier": "^1.18.0",
-    "typescript": "^3.6.4",
-    "rimraf": "^3.0.0"
+    "typescript": "^3.6.4"
   },
   "dependencies": {
     "got": "^9.6.0",
