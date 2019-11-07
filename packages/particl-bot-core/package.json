@@ -1,6 +1,6 @@
 {
   "name": "particl-bot-core",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "SMSG Bot Core",
   "author": "Robert Edwards <rob@particl.io>",
   "license": "GPL-2.0",
@@ -31,6 +31,6 @@
   },
   "dependencies": {
     "particl-bitcore-lib": "git://github.com/particl/particl-bitcore-lib.git",
-    "particl-client": "^0.0.1"
+    "particl-client": "^0.0.2"
   }
 }

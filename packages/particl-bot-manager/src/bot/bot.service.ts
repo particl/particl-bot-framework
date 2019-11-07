@@ -33,6 +33,13 @@ export class BotService {
 
     if (type) {
       query = query.where('type = :type', {type});
+      if (search) {
+        query = query.andWhere('bots.address LIKE :search OR bots.name LIKE :search OR bots.description LIKE :search', {search: `%${search}%`})
+      }
+    } else {
+      if (search) {
+        query = query.where('bots.address LIKE :search OR bots.name LIKE :search OR bots.description LIKE :search', {search: `%${search}%`})
+      }
     }
 
     query = query.skip(page * pageLimit);

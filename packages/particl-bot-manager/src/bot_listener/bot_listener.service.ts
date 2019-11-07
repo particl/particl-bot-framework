@@ -46,7 +46,10 @@ export class BotListenerService {
         ...discoveryMessage
       }
 
-      await this.botRepository.save(modifiedBot);
+      try {
+        await this.botRepository.save(modifiedBot);
+      } catch (e) {}
+      
     });
 
     this.particlBot.start();

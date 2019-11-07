@@ -27,6 +27,8 @@ export class AppController {
         return this.botListenerService.sendCommand(params);
       case 'exchanges':
         return this.exchangeService.search(params);
+      case 'uniqueExchangeData':
+        return this.exchangeService.uniqueExchangeData(params);
       default:
         throw new HttpException(`Method not found.`, HttpStatus.NOT_FOUND);
     }

@@ -1,32 +1,93 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Exchange } from './exchange.entity';
-import { Repository } from 'typeorm';
+import { Repository, Like } from 'typeorm';
+import { Bot } from '../bot/bot.entity';
 
 @Injectable()
 export class ExchangeService {
   constructor(
     @InjectRepository(Exchange)
-    private readonly repo: Repository<Exchange>
+    private readonly exchangeRepo: Repository<Exchange>,
+    @InjectRepository(Bot)
+    private readonly botRepo: Repository<Bot>
   ) {}
 
   search(params?: any[]) {
-    let page, pageLimit;
+    let page, pageLimit, bot, currency_from, currency_to, search;
 
-    page      = this._getParam(params, 0 , 'number', true);
-    pageLimit = this._getParam(params, 1 , 'number', true);
+    page          = this._getParam(params, 0 , 'number', true);
+    pageLimit     = this._getParam(params, 1 , 'number', true);
+    bot           = this._getParam(params, 2 , 'string');
+    currency_from = this._getParam(params, 3 , 'string');
+    currency_to   = this._getParam(params, 4 , 'string');
+    search        = this._getParam(params, 5 , 'string');
 
     const wallet = process.env.WALLET || '__DEFAULT_WALLET';
 
-    return this.repo.find({
+    const where: any = [];
+
+    const baseWhere = {
+      wallet
+    }
+
+    if (bot) {
+      baseWhere['bot'] = bot;
+    }
+
+    if (currency_from) {
+      baseWhere['currency_from'] = currency_from;
+    }
+
+    if (currency_to) {
+      baseWhere['currency_to'] = currency_to;
+    }
+
+    if (search) {
+      where.push({track_id: Like(`%${search}%`), baseWhere});
+      where.push({amount_from: Like(`%${search}%`), baseWhere});
+      where.push({amount_to: Like(`%${search}%`), baseWhere});
+      where.push({address_from: Like(`%${search}%`), baseWhere});
+      where.push({address_to: Like(`%${search}%`), baseWhere});
+      where.push({status: Like(`%${search}%`), baseWhere});
+      where.push({tx_from: Like(`%${search}%`), baseWhere});
+      where.push({tx_to: Like(`%${search}%`), baseWhere});
+    } else {
+      where.push(baseWhere);
+    }
+
+    return this.exchangeRepo.find({
       relations: ['bot'],
-      where: { wallet },
+      where,
       skip: page * pageLimit,
       take: pageLimit,
       order: {
         id: 'DESC'
       }
     });
+  }
+
+  async uniqueExchangeData(params: any[]) {
+    const baseQuery = this.exchangeRepo.createQueryBuilder('exchanges');
+
+    const currencyFrom = await baseQuery.select('DISTINCT currency_from').getRawMany();
+    const currencyTo = await baseQuery.select('DISTINCT currency_to').getRawMany();
+    const bots = await baseQuery.select('DISTINCT botAddress').getRawMany();
+
+    const transformedBots = [];
+    for (const b of bots) {
+      transformedBots.push(await this.botRepo.findOne({select: ['address', 'name'], where: {address: b.botAddress}}));
+    }
+    
+    return {
+      currency_from: this.flatten(currencyFrom, 'currency_from'),
+      currency_to: this.flatten(currencyTo, 'currency_to'),
+      bots: transformedBots,
+    };
+  }
+
+  private flatten(arr: any[], key: string) {
+    return arr.map((r) => r[key]);
   }
 
   private _getParam(params: any[], index: number, type: string, required: boolean = false){

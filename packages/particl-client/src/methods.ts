@@ -29,6 +29,14 @@ export class Methods {
     return this.client.call('smsgaddlocaladdress', [address]);
   }
 
+  public async smsgScanBuckets() {
+    return this.client.call('smsgscanbuckets');
+  }
+
+  public async smsgInbox(mode: 'all' | 'unread' | 'clear' = 'all', filter: string = '') {
+    return this.client.call('smsginbox', [mode, filter]);
+  }
+
   public async smsgSend(
     fromAddress: string,
     toAddress: string,

@@ -1,4 +1,4 @@
-import { ParticlClient, IParticlClientConfig } from 'particl-client'
+import { ParticlClient, IParticlClientConfig } from 'particl-client';
 import { EventEmitter } from 'events';
 import { MESSAGE_TYPES } from './types';
 import { BROADCAST_KEYS, DEFAULT_NETWORK } from './defaults';
@@ -143,16 +143,19 @@ export class ParticlBotBase extends EventEmitter {
     this.send(this.broadcastAddress, message);
   }
 
-  private async processSMSGMessage(msgid: string) {
+  protected async processSMSGMessage(msgid: string) {
     const SMSGMessageResponse = await this.particlClient.methods.smsg(msgid);
     if (SMSGMessageResponse.from !== this.address) {
       try {
         const message = JSON.parse(SMSGMessageResponse.text) as SMSGMessage;
-
+        let remove = true;
         if (message.version.startsWith(`${packageInfo.name}_`)) {
           switch (message.type) {
             case MESSAGE_TYPES.DISCOVERY:
-              this.emit(message.type, message.payload);
+              if (SMSGMessageResponse.from === message.payload['address']) {
+                remove = false;
+                this.emit(message.type, message.payload);
+              }
               break;
 
             case MESSAGE_TYPES.COMMAND:
@@ -165,7 +168,7 @@ export class ParticlBotBase extends EventEmitter {
               break;
           }
 
-          await this.particlClient.methods.smsg(msgid, true);
+          await this.particlClient.methods.smsg(msgid, remove, true);
         }
       } catch (e) {}
     }
