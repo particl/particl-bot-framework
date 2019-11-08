@@ -1,3 +1,14 @@
+export type AuthorChat = {
+  type: string;
+  id: string;
+}
+
+export type BotAuthor = {
+  name?: string,
+  email?: string,
+  chat_ids?: AuthorChat[]
+}
+
 export enum MESSAGE_TYPES {
 
   DISCOVERY = 'DISCOVERY',

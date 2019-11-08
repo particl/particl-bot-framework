@@ -17,7 +17,7 @@ export class BotListenerService {
     private readonly botRepository: Repository<Bot>,
     private readonly walletAddressService: WalletAddressService,
     @InjectRepository(Exchange)
-    private readonly exchangeRepository: Repository<Exchange>,
+    private readonly exchangeRepository: Repository<Exchange>
   ) {
     this.initialize();
   }
@@ -40,10 +40,21 @@ export class BotListenerService {
 
     this.particlBot.on(MESSAGE_TYPES.DISCOVERY, async (discoveryMessage) => {
       const bot = await this.botRepository.findOne(discoveryMessage.address);
-
+  
+      const modifiedAuthor = {
+        author: {
+          ...bot.author,
+          name: '',
+          email: '',
+          chat_ids: [],
+          ...discoveryMessage.author
+        }
+      }
+      
       const modifiedBot = {
         ...bot,
-        ...discoveryMessage
+        ...discoveryMessage,
+        ...modifiedAuthor
       }
 
       try {

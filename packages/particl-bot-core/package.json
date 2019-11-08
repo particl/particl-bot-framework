@@ -1,6 +1,6 @@
 {
   "name": "particl-bot-core",
-  "version": "0.0.3",
+  "version": "0.0.6",
   "description": "SMSG Bot Core",
   "author": "Robert Edwards <rob@particl.io>",
   "license": "GPL-2.0",

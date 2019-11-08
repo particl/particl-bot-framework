@@ -1,6 +1,6 @@
 import { ParticlBotBase, BotBaseConfig } from './bot_base';
 import { DiscoveryMessage } from './messages/discovery.message';
-import { BOT_TYPES } from './types';
+import { BOT_TYPES, BotAuthor } from './types';
 
 import * as fs from 'fs';
 import * as path from 'path';
@@ -15,6 +15,7 @@ export type BotConfig = {
     mainnet?: string
   };
   type: BOT_TYPES;
+  author?: BotAuthor
 } & BotBaseConfig;
 
 export class ParticlBot extends ParticlBotBase {
@@ -75,6 +76,7 @@ export class ParticlBot extends ParticlBotBase {
         this.config.version,
         this.address,
         this.config.type,
+        this.config.author,
         this.getBotIcon()
       );
 

@@ -1,6 +1,6 @@
 {
   "name": "particl-bot-manager",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "",
   "author": "",
   "license": "MIT",
@@ -27,7 +27,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js --config src/ormconfig.ts",
-    "typeorm:migrate": "yarn prebuild && yarn typeorm migration:generate -- -n",
+    "typeorm:migrate": "yarn prebuild && yarn typeorm migration:generate -n",
     "typeorm:run": "yarn typeorm migration:run",
     "prepublish": "yarn build"
   },
@@ -41,13 +41,13 @@
     "class-transformer": "^0.2.3",
     "class-validator": "^0.10.1",
     "dotenv": "^8.2.0",
-    "particl-bot-core": "^0.0.3",
+    "particl-bot-core": "^0.0.6",
     "particl-client": "^0.0.2",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.0",
     "rxjs": "^6.5.3",
     "sqlite3": "https://github.com/particl/sqlite3-offline.git",
-    "typeorm": "^0.2.19"
+    "typeorm": "^0.2.20"
   },
   "devDependencies": {
     "@nestjs/cli": "^6.9.0",

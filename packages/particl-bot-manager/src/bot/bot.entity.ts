@@ -1,5 +1,7 @@
 
-import { Entity, Column, OneToMany, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, OneToMany, JoinTable, OneToOne, JoinColumn } from 'typeorm';
+import { BotWallet } from './bot_wallet.entity';
+import { BotAuthor } from './bot_author.entity';
 
 @Entity({ name: 'bots' })
 export class Bot {
@@ -25,18 +27,10 @@ export class Bot {
   @Column()
   image: string;
 
+  @OneToOne(type => BotAuthor, { cascade: true, eager: true })
+  @JoinColumn()
+  author: BotAuthor;
+
   @OneToMany(type => BotWallet, wallet => wallet.bot)
   wallets: BotWallet[];
-}
-
-@Entity({ name: 'bot_wallets' })
-export class BotWallet {
-  @PrimaryGeneratedColumn()
-  id: number;
-  
-  @Column()
-  name: string;
-
-  @ManyToOne(type => Bot, bot => bot.wallets)
-  bot: Bot;
 }

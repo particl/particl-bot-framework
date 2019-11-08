@@ -28,7 +28,7 @@ export class ParticlBotListener extends ParticlBotBase {
       await this.particlClient.methods.smsgScanBuckets();
     }
 
-    const inbox = await this.particlClient.methods.smsgInbox('all', this.broadcastAddress);
+    const inbox = await this.particlClient.methods.smsgInbox('unread', this.broadcastAddress);
 
     for (const msg of inbox.messages) {
       try {

@@ -1,7 +1,8 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Bot, BotWallet } from './bot.entity';
+import { Bot } from './bot.entity';
 import { Repository } from 'typeorm';
+import { BotWallet } from './bot_wallet.entity';
 
 @Injectable()
 export class BotService {
@@ -26,21 +27,23 @@ export class BotService {
     const wallet = process.env.WALLET || '__DEFAULT_WALLET';
 
     if (enabled) {
-      query = query.innerJoinAndSelect('bots.wallets', 'bot_wallets', 'bot_wallets.name = :name AND bot_wallets.bot = bots.address', { name: wallet })
+      query = query.innerJoinAndSelect('bots.wallets', 'bot_wallets', 'bot_wallets.name = :name AND bot_wallets.bot = bots.address', { name: wallet });
     } else {
-      query = query.leftJoinAndSelect('bots.wallets', 'bot_wallets', 'bot_wallets.name = :name AND bot_wallets.bot = bots.address', { name: wallet })
+      query = query.leftJoinAndSelect('bots.wallets', 'bot_wallets', 'bot_wallets.name = :name AND bot_wallets.bot = bots.address', { name: wallet });
     }
 
     if (type) {
       query = query.where('type = :type', {type});
       if (search) {
-        query = query.andWhere('bots.address LIKE :search OR bots.name LIKE :search OR bots.description LIKE :search', {search: `%${search}%`})
+        query = query.andWhere('bots.address LIKE :search OR bots.name LIKE :search OR bots.description LIKE :search', {search: `%${search}%`});
       }
     } else {
       if (search) {
-        query = query.where('bots.address LIKE :search OR bots.name LIKE :search OR bots.description LIKE :search', {search: `%${search}%`})
+        query = query.where('bots.address LIKE :search OR bots.name LIKE :search OR bots.description LIKE :search', {search: `%${search}%`});
       }
     }
+
+    query = query.leftJoinAndSelect('bots.author', 'bot_author')
 
     query = query.skip(page * pageLimit);
     query = query.take(pageLimit);
