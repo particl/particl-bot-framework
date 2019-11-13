@@ -1,7 +1,7 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Exchange } from './exchange.entity';
-import { Repository, Like } from 'typeorm';
+import { Repository, Like, IsNull, Not } from 'typeorm';
 import { Bot } from '../bot/bot.entity';
 
 @Injectable()
@@ -14,7 +14,7 @@ export class ExchangeService {
   ) {}
 
   search(params?: any[]) {
-    let page, pageLimit, bot, currency_from, currency_to, search;
+    let page, pageLimit, bot, currency_from, currency_to, search, complete;
 
     page          = this._getParam(params, 0 , 'number', true);
     pageLimit     = this._getParam(params, 1 , 'number', true);
@@ -22,6 +22,7 @@ export class ExchangeService {
     currency_from = this._getParam(params, 3 , 'string');
     currency_to   = this._getParam(params, 4 , 'string');
     search        = this._getParam(params, 5 , 'string');
+    complete      = this._getParam(params, 6 , 'boolean');
 
     const wallet = process.env.WALLET || '__DEFAULT_WALLET';
 
@@ -41,6 +42,10 @@ export class ExchangeService {
 
     if (currency_to) {
       baseWhere['currency_to'] = currency_to;
+    }
+
+    if (complete !== null && complete !== undefined) {
+      baseWhere['tx_to'] = complete ? Not(IsNull()) : IsNull();
     }
 
     if (search) {

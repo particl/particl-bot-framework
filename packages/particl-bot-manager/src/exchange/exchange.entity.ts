@@ -1,5 +1,5 @@
 
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Bot } from '../bot/bot.entity';
 
 @Entity({ name: 'exchanges' })
@@ -42,4 +42,10 @@ export class Exchange {
 
   @ManyToOne(type => Bot)
   bot: Bot;
+
+  @CreateDateColumn()
+  created_date: Date
+
+  @UpdateDateColumn()
+  updated_date: Date
 }
