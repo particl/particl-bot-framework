@@ -13,8 +13,25 @@ export class ExchangeService {
     private readonly botRepo: Repository<Bot>
   ) {}
 
+  exec(params: any[] = []) {
+    if (params.length === 0) {
+      throw new HttpException(`Method not found.`, HttpStatus.NOT_FOUND);
+    }
+    const method = params.shift();
+    switch (method) {
+      case 'search':
+        return this.search(params);
+      case 'cancel':
+        return this.cancel(params);
+      case 'uniqueExchangeData':
+        return this.uniqueExchangeData(params);
+      default:
+        throw new HttpException(`Method not found.`, HttpStatus.NOT_FOUND);
+    }
+  }
+
   search(params?: any[]) {
-    let page, pageLimit, bot, currency_from, currency_to, search, complete;
+    let page, pageLimit, bot, currency_from, currency_to, search, complete, cancelled;
 
     page          = this._getParam(params, 0 , 'number', true);
     pageLimit     = this._getParam(params, 1 , 'number', true);
@@ -23,6 +40,7 @@ export class ExchangeService {
     currency_to   = this._getParam(params, 4 , 'string');
     search        = this._getParam(params, 5 , 'string');
     complete      = this._getParam(params, 6 , 'boolean');
+    cancelled     = this._getParam(params, 7 , 'boolean');
 
     const wallet = process.env.WALLET || '__DEFAULT_WALLET';
 
@@ -48,6 +66,10 @@ export class ExchangeService {
       baseWhere['tx_to'] = complete ? Not('') : '';
     }
 
+    if (cancelled !== null && cancelled !== undefined) {
+      baseWhere['status'] = cancelled ? 'Cancelled' : Not('Cancelled');
+    }
+
     if (search) {
       where.push({track_id: Like(`%${search}%`), baseWhere});
       where.push({amount_from: Like(`%${search}%`), baseWhere});
@@ -70,6 +92,32 @@ export class ExchangeService {
         id: 'DESC'
       }
     });
+  }
+
+  async cancel(params?: any[]) {
+    let track_id;
+
+    track_id = this._getParam(params, 0 , 'string', true);
+
+    const exchange = await this.exchangeRepo.findOne({where: {track_id}});
+
+    if (!exchange) {
+      throw new HttpException(`Bad request, can't find exchange with id of ${track_id}.`, HttpStatus.BAD_REQUEST);
+    }
+
+    if (exchange.tx_from) {
+      throw new HttpException(`Bad request, can't cancel exchange if payment has been made.`, HttpStatus.BAD_REQUEST);
+    }
+
+    if (exchange.status === 'Cancelled') {
+      throw new HttpException(`Bad request, exchange already cancelled.`, HttpStatus.BAD_REQUEST);
+    }
+
+    exchange.status = 'Cancelled';
+
+    await this.exchangeRepo.save(exchange);
+
+    return this.exchangeRepo.findOne({where: {track_id}});
   }
 
   async uniqueExchangeData(params: any[]) {

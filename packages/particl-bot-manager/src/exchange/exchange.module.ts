@@ -3,12 +3,12 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Exchange } from './exchange.entity';
 import { ExchangeService } from './exchange.service';
-import { BotModule } from '../bot/bot.module';
+import { Bot } from '../bot/bot.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Exchange]),
-    BotModule
+    TypeOrmModule.forFeature([Bot]),
   ],
   exports: [TypeOrmModule, ExchangeService],
   providers: [ExchangeService]
