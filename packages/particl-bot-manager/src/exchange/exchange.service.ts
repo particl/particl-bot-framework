@@ -45,7 +45,7 @@ export class ExchangeService {
     }
 
     if (complete !== null && complete !== undefined) {
-      baseWhere['tx_to'] = complete ? Not(IsNull()) : IsNull();
+      baseWhere['tx_to'] = complete ? Not('') : '';
     }
 
     if (search) {
