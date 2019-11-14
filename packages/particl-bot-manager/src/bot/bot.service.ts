@@ -101,7 +101,8 @@ export class BotService {
     }
     let query = this.botRepo.createQueryBuilder('bots')
                             .where('address = :address', {address: botAddress})
-                            .leftJoinAndSelect('bots.wallets', 'bot_wallets', 'bot_wallets.name = :name AND bot_wallets.bot = bots.address', { name });
+                            .leftJoinAndSelect('bots.wallets', 'bot_wallets', 'bot_wallets.name = :name AND bot_wallets.bot = bots.address', { name })
+                            .leftJoinAndSelect('bots.author', 'bot_author');
 
     return query.getOne();
   }
@@ -130,7 +131,8 @@ export class BotService {
 
     let query = this.botRepo.createQueryBuilder('bots')
                             .where('address = :address', {address: botAddress})
-                            .leftJoinAndSelect('bots.wallets', 'bot_wallets', 'bot_wallets.name = :name AND bot_wallets.bot = bots.address', { name });
+                            .leftJoinAndSelect('bots.wallets', 'bot_wallets', 'bot_wallets.name = :name AND bot_wallets.bot = bots.address', { name })
+                            .leftJoinAndSelect('bots.author', 'bot_author');
 
     return query.getOne();
   }
