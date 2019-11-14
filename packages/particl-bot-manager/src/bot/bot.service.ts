@@ -99,8 +99,11 @@ export class BotService {
         bot
       });
     }
+    let query = this.botRepo.createQueryBuilder('bots')
+                            .where('address = :address', {address: botAddress})
+                            .leftJoinAndSelect('bots.wallets', 'bot_wallets', 'bot_wallets.name = :name AND bot_wallets.bot = bots.address', { name });
 
-    return this.botRepo.findOne(botAddress, {relations: ['wallets']});
+    return query.getOne();
   }
 
   async disable(params?: any[]) {
@@ -125,7 +128,11 @@ export class BotService {
       await this.botWalletRepo.remove(bot_wallet);
     }
 
-    return this.botRepo.findOne(botAddress, {relations: ['wallets']});
+    let query = this.botRepo.createQueryBuilder('bots')
+                            .where('address = :address', {address: botAddress})
+                            .leftJoinAndSelect('bots.wallets', 'bot_wallets', 'bot_wallets.name = :name AND bot_wallets.bot = bots.address', { name });
+
+    return query.getOne();
   }
 
   async command(params: any[] = []) {
