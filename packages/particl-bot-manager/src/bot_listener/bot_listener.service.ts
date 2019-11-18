@@ -37,10 +37,10 @@ export class BotListenerService {
 
     this.particlBot.on(MESSAGE_TYPES.DISCOVERY, async (discoveryMessage) => {
       const bot = await this.botRepository.findOne(discoveryMessage.address);
-  
+      const currentAuthor = bot ? bot.author : {};
       const modifiedAuthor = {
         author: {
-          ...bot.author,
+          ...currentAuthor,
           name: '',
           email: '',
           chat_ids: [],
