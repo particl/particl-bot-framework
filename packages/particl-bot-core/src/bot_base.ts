@@ -145,7 +145,7 @@ export class ParticlBotBase extends EventEmitter {
 
   protected async processSMSGMessage(msgid: string) {
     const SMSGMessageResponse = await this.particlClient.methods.smsg(msgid);
-    if (SMSGMessageResponse.from !== this.address) {
+    if (SMSGMessageResponse.to === this.address || SMSGMessageResponse.to === this.broadcastAddress) {
       try {
         const message = JSON.parse(SMSGMessageResponse.text) as SMSGMessage;
         let remove = true;
