@@ -1,6 +1,6 @@
 {
   "name": "particl-bot-manager",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "",
   "author": "",
   "license": "MIT",
@@ -41,8 +41,8 @@
     "class-transformer": "^0.2.3",
     "class-validator": "^0.10.1",
     "dotenv": "^8.2.0",
-    "particl-bot-core": "^0.0.6",
-    "particl-client": "^0.0.2",
+    "particl-bot-core": "^0.0.7",
+    "particl-client": "^0.0.3",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.0",
     "rxjs": "^6.5.3",
