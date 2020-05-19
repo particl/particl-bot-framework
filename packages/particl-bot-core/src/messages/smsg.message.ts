@@ -2,10 +2,10 @@ import { DiscoveryMessage } from './discovery.message';
 import { CommandMessage } from './command.message';
 import { ResponseMessage } from './response.message';
 
-export type SupportedMessageTypes = DiscoveryMessage | CommandMessage | ResponseMessage;
+export type SupportedMessageTypes = DiscoveryMessage | CommandMessage | ResponseMessage | string;
 
 export class SMSGMessage {
-  
+
   public version: string;
   public type: string;
   public payload: SupportedMessageTypes;
