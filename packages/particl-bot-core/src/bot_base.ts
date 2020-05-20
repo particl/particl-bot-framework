@@ -211,6 +211,7 @@ export class ParticlBotBase extends EventEmitter {
         await this.particlClient.methods.smsg(msgid, remove, true);
       } catch (e) {}
     }
+    return SMSGMessageResponse;
   }
 }
 
