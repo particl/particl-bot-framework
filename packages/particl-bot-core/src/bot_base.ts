@@ -21,7 +21,9 @@ class NOOPLogger {
 export type BotBaseConfig = {
   network?: string;
   particlClient?: IParticlClientConfig;
-  logger?: any
+  logger?: any;
+  simpleBot?: boolean;
+  simpleCommands?: string[];
 }
 
 export class ParticlBotBase extends EventEmitter {
@@ -51,7 +53,7 @@ export class ParticlBotBase extends EventEmitter {
     }
 
     particlConfig.network = this.config.network;
-    
+
     this.particlClient = new ParticlClient(particlConfig);
 
     this.particlClient.on('smsg', (smsghash) => {
@@ -63,13 +65,18 @@ export class ParticlBotBase extends EventEmitter {
   private setDefaults(config: BotBaseConfig) {
     config.logger = config.logger || new NOOPLogger;
     config.network = config.network || DEFAULT_NETWORK
+    config.simpleBot = config.simpleBot || false;
+
+    if (config.simpleBot && (!config.simpleCommands || !config.simpleCommands.length)) {
+      throw new Error('simpleBot requires a list of simpleCommands');
+    }
 
     return config;
   }
 
   public async start() {
     await this.particlClient.connect();
-    
+
     await this.particlClient.methods.smsgImportPrivKey(this.broadcastPrivKey, 'Particl Bot Broadcast');
     this.config.logger.info(await this.particlClient.methods.smsgAddAddress(this.broadcastAddress, this.broadcastPubKey));
   }
@@ -78,7 +85,7 @@ export class ParticlBotBase extends EventEmitter {
     await this.particlClient.disconnect();
   }
 
-  public async send(to: string, message: SupportedMessageTypes, daysRetention: number = 7){
+  public async send(to: string, message: SupportedMessageTypes, daysRetention: number = 7) {
     let type;
     switch (true) {
       case message instanceof DiscoveryMessage:
@@ -93,17 +100,28 @@ export class ParticlBotBase extends EventEmitter {
         type = MESSAGE_TYPES.RESPONSE;
         break;
 
+      case this.config.simpleBot && ['string', 'object'].indexOf(typeof message) !== -1:
+        type = MESSAGE_TYPES.SIMPLE;
+        break;
+
       default:
         throw new Error('Unsupported message type.');
     }
 
-    const smsgMsg = new SMSGMessage(
-      `${packageInfo.name}_${packageInfo.version}`,
-      type,
-      message
-    );
+    let serializedMessage;
 
-    const serializedMessage = JSON.stringify(smsgMsg);
+    if (this.config.simpleBot && type === MESSAGE_TYPES.SIMPLE) {
+      serializedMessage = typeof message === 'object' ? JSON.stringify(message) : message;
+    } else {
+
+      const smsgMsg = new SMSGMessage(
+        `${packageInfo.name}_${packageInfo.version}`,
+        type,
+        message
+      );
+
+      serializedMessage = JSON.stringify(smsgMsg);
+    }
 
     return this.particlClient.methods.smsgSend(
       this.address,
@@ -131,7 +149,7 @@ export class ParticlBotBase extends EventEmitter {
             clearTimeout(timeout);
             resolve(result);
           });
-          
+
         }
       } catch (e) {
         reject(e);
@@ -147,32 +165,54 @@ export class ParticlBotBase extends EventEmitter {
     const SMSGMessageResponse = await this.particlClient.methods.smsg(msgid);
     if (SMSGMessageResponse.to === this.address || SMSGMessageResponse.to === this.broadcastAddress) {
       try {
-        const message = JSON.parse(SMSGMessageResponse.text) as SMSGMessage;
-        let remove = true;
-        if (message.version.startsWith(`${packageInfo.name}_`)) {
-          switch (message.type) {
-            case MESSAGE_TYPES.DISCOVERY:
-              if (SMSGMessageResponse.from === message.payload['address']) {
-                remove = false;
-                this.emit(message.type, message.payload);
-              }
-              break;
+        let remove = false;
+        if (this.config.simpleBot && !SMSGMessageResponse.text.startsWith('{')) {
+          const simpleMessage = SMSGMessageResponse.text.split(' ');
 
-            case MESSAGE_TYPES.COMMAND:
-              const response = new ResponseBuilder(msgid, SMSGMessageResponse.from, this);
-              this.emit(message.payload['command'], message.payload['params'], response);
-              break;
+          const response = new ResponseBuilder(msgid, SMSGMessageResponse.from, this, true);
+          const command = simpleMessage.shift();
 
-            case MESSAGE_TYPES.RESPONSE:
-              this.emit(message.payload['id'], {data: message.payload['response'], error: message.payload['error']});
-              break;
+          if (this.config.simpleCommands.indexOf(command) === -1) {
+            if (this.config.simpleCommands.indexOf('help') === -1) {
+              response.error(`command not supported: ${command}`);
+            } else {
+              this.emit('help', [command], response);
+            }
+          } else {
+            this.emit(command, simpleMessage, response);
           }
+          remove = true;
+        } else {
 
-          await this.particlClient.methods.smsg(msgid, remove, true);
+          const message = JSON.parse(SMSGMessageResponse.text) as SMSGMessage;
+          remove = true;
+
+          if (message.version.startsWith(`${packageInfo.name}_`)) {
+            switch (message.type) {
+              case MESSAGE_TYPES.DISCOVERY:
+                if (SMSGMessageResponse.from === message.payload['address']) {
+                  remove = false;
+                  this.emit(message.type, message.payload);
+                }
+                break;
+
+              case MESSAGE_TYPES.COMMAND:
+                const response = new ResponseBuilder(msgid, SMSGMessageResponse.from, this);
+                this.emit(message.payload['command'], message.payload['params'], response);
+                break;
+
+              case MESSAGE_TYPES.RESPONSE:
+                this.emit(message.payload['id'], {data: message.payload['response'], error: message.payload['error']});
+                break;
+            }
+          }
         }
+
+        await this.particlClient.methods.smsg(msgid, remove, true);
       } catch (e) {}
     }
-  }  
+    return SMSGMessageResponse;
+  }
 }
 
 class ResponseBuilder {
@@ -180,12 +220,13 @@ class ResponseBuilder {
   constructor(
     private readonly id: string,
     private readonly from: string,
-    private readonly _bot: ParticlBotBase
+    private readonly _bot: ParticlBotBase,
+    private readonly simpleMessage: boolean = false
   ) {}
 
   send(data: any) {
-    const msg = new ResponseMessage(this.id, data, null);
-    this._bot.send(this.from, msg);
+    const msg = this.simpleMessage ? data : new ResponseMessage(this.id, data, null);
+    this._bot.send(this.from, msg, 2);
   }
 
   error(error: string) {
