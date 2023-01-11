@@ -39,7 +39,7 @@
     "@nestjsx/crud": "^4.2.0",
     "@nestjsx/crud-typeorm": "^4.2.0",
     "class-transformer": "^0.2.3",
-    "class-validator": "^0.10.1",
+    "class-validator": "^0.14.0",
     "dotenv": "^8.2.0",
     "particl-bot-core": "^0.0.7",
     "particl-client": "^0.0.3",
